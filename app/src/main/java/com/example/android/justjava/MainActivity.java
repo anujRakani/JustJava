@@ -4,7 +4,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.NumberFormat;
 
@@ -33,9 +35,17 @@ public class MainActivity extends AppCompatActivity {
      * This method is called when the order button is clicked.
      */
     public void submitOrder(View view) {
-        int price = calculatePrice();
-        boolean hasWhippedCream = checkBoxState();
-        String priceMessage = createOrderSummary(price,hasWhippedCream);
+        EditText nameEditText = (EditText) findViewById(R.id.name_field);
+        String name = nameEditText.getText().toString();
+
+        CheckBox whippedCreamCheckBox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
+        boolean hasWhippedCream = whippedCreamCheckBox.isChecked();
+
+        CheckBox chocolateCheckBox = (CheckBox) findViewById(R.id.chocolate_checkbox);
+        boolean hasChocolate = chocolateCheckBox.isChecked();
+
+        int price = calculatePrice(hasWhippedCream, hasChocolate);
+        String priceMessage = createOrderSummary(name,price,hasWhippedCream,hasChocolate);
         displayMessage(priceMessage);
     }
 
@@ -44,8 +54,18 @@ public class MainActivity extends AppCompatActivity {
      *
      * @return total price
      */
-    private int calculatePrice() {
-        return quantity * 5;
+    private int calculatePrice(boolean hasWhippedCream, boolean hasChocolate) {
+        int price = 5;
+
+        if (hasWhippedCream) {
+            price += 1;
+        }
+
+        if (hasChocolate) {
+            price += 2;
+        }
+
+        return quantity * price;
     }
 
     /**
@@ -55,26 +75,32 @@ public class MainActivity extends AppCompatActivity {
      * @param hasWhippedCream does order contain whipped cream
      * @return text summary
      */
-    private String createOrderSummary(int price, boolean hasWhippedCream) {
-        String priceMessage = "Name: Anuj" +
+    private String createOrderSummary(String name, int price, boolean hasWhippedCream, boolean hasChocolate) {
+        String priceMessage = "Name: " + name +
                         "\nAdd whipped cream? " + hasWhippedCream +
+                        "\nAdd chocolate? " + hasChocolate +
                         "\nQuantity: " + quantity +
                         "\nTotal: Rs. " + price +
                         "\nThank You!";
         return priceMessage;
     }
 
-    private boolean checkBoxState() {
-        CheckBox whippedCreamCheckBox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
-        return whippedCreamCheckBox.isChecked();
-    }
-
     public void increment(View view) {
+        if (quantity == 100) {
+            Toast.makeText(this,"You cannot order coffees more than 100.",Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         quantity = quantity + 1;
         displayQuantity(quantity);
     }
 
     public void decrement(View view) {
+        if (quantity == 1) {
+            Toast.makeText(this,"You cannot order coffees less than 1.",Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         quantity = quantity - 1;
         displayQuantity(quantity);
     }
